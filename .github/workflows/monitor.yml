@@ -1,0 +1,39 @@
+name: Panini Treasure Box Monitor
+
+on:
+  schedule:
+    # Alle 10 Min, offset um Top-of-the-Hour-Rush zu vermeiden
+    - cron: "3,13,23,33,43,53 * * * *"
+  workflow_dispatch: # manueller Trigger für Test
+
+permissions:
+  contents: write # nötig damit der Workflow last_status.txt committen kann
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Run monitor
+        env:
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+        run: python monitor.py
+
+      - name: Commit state if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          if [[ -n $(git status -s) ]]; then
+            git add last_status.txt
+            git commit -m "Update last_status [skip ci]"
+            git push
+          fi
