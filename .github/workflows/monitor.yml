@@ -3,7 +3,7 @@ name: Panini Treasure Box Monitor
 on:
   schedule:
     # Alle 10 Min, offset um Top-of-the-Hour-Rush zu vermeiden
-    - cron: "3,13,23,33,43,53 * * * *"
+    - cron: "*/5 * * * *"
   workflow_dispatch: # manueller Trigger für Test
 
 permissions:
